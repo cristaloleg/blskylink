@@ -1,0 +1,31 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  default:
+    desc: show this help
+    cmds:
+      - task --list-all
+    silent: true
+
+  install:
+    desc: install deps
+    cmds:
+      - npm i
+
+  gen:
+    desc: gen Cloudflare stuff
+    cmds:
+      - npm run cf-typegen
+
+  logs:
+    desc: logs from Cloudflare
+    cmds:
+      - wrangler tail blskylink
+
+  deploy:
+    desc: do deploy
+    cmds:
+      - npx wrangler deploy
+      - say done
