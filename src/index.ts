@@ -27,15 +27,24 @@ export default {
 					<main class="container">
 						<h1>BlueSky Link</h1>
 			
-						<p>The only idea for this website is to convert the long BlusSky profile URL to something shorter.</p>
-
+						<p>The only idea for this website is to convert the long BlusSky profile or post URL to something shorter.</p>
 						
 						<p>
 						From
 						<a href="https://bsky.app/profile/go-perf.bsky.social">https://bsky.app/profile/go-perf.bsky.social</a>
 						</p>
 						<p>To <a href="https://blskyl.ink/go-perf">https://blskyl.ink/go-perf</a></p>
-						
+
+						<hr>
+
+						<p>
+						From
+						<a href="https://bsky.app/profile/go-perf.bsky.social/post/3lat7j6xktk2k">https://bsky.app/profile/go-perf.bsky.social/post/3lat7j6xktk2k</a>
+						</p>
+						<p>To <a href="https://blskyl.ink/go-perf/3lat7j6xktk2k">https://blskyl.ink/go-perf/3lat7j6xktk2k</a></p>
+
+						<hr>
+
 						<p>
 						Just add your nickname after "https://blskyl.ink/" in the address bar and voila!
 						</p>
@@ -93,14 +102,13 @@ export default {
 
 		async function handleGET(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 			const url = new URL(request.url);
-			const { pathname } = url;
-			const profile = pathname.substring(1);
+			const pathname = url.pathname.substring(1);
 
-			if (profile === '') {
+			if (pathname === '') {
 				return handleHome();
 			}
 
-			if (profile === 'robots.txt') {
+			if (pathname === 'robots.txt') {
 				const text = `User-Agent: *
 Disallow: /
 `;
@@ -108,7 +116,7 @@ Disallow: /
 				return handleText(text);
 			}
 
-			if (profile === 'security.txt') {
+			if (pathname === 'security.txt') {
 				const text = `Contact: mailto:security@blskyl.ink
 Preferred-Languages: en
 `;
@@ -116,15 +124,18 @@ Preferred-Languages: en
 				return handleText(text);
 			}
 
-			if (profile.includes('/')) {
+			const pathSegments = pathname.split('/');
+			if (pathSegments.length > 2) {
 				return handle404();
 			}
 
 			const base = 'https://bsky.app/profile/';
 			const statusCode = 301;
+			const profile = pathSegments[0];
+			const postSuff = pathSegments.length == 1 ? "" : "/post/" + pathSegments[1];
 
 			if (!profile.includes('.')) {
-				const destinationURL = `${base}${profile}.bsky.social`;
+				const destinationURL = `${base}${profile}.bsky.social${postSuff}`;
 				return Response.redirect(destinationURL, statusCode);
 			}
 
@@ -135,7 +146,7 @@ Preferred-Languages: en
 				return handle404();
 			}
 
-			const destinationURL = `${base}${profile}`;
+			const destinationURL = `${base}${profile}${postSuff}`;
 			return Response.redirect(destinationURL, statusCode);
 		}
 
